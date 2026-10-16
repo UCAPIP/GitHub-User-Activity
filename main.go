@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// GitHubEvent описывает один элемент из массива событий
+// GitHubEvent describes a single element in an array of events
 type GitHubEvent struct {
 	ID        string    `json:"id"`
 	Type      string    `json:"type"`
@@ -21,7 +21,7 @@ type GitHubEvent struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// Actor описывает пользователя, совершившего действие
+// “Actor” describes a user who has performed an action
 type Actor struct {
 	ID           int    `json:"id"`
 	Login        string `json:"login"`
@@ -31,30 +31,30 @@ type Actor struct {
 	AvatarURL    string `json:"avatar_url"`
 }
 
-// Repo описывает репозиторий, в котором произошло событие
+// “Repo” refers to the repository in which the event occurred
 type Repo struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
 
-// Payload содержит специфичные данные для каждого типа события.
-// Мы объединили поля из WatchEvent и PushEvent. Те, которых нет в конкретном событии, просто останутся дефолтными.
+// The payload contains event-specific data for each event type.
+// I've combined the fields from WatchEvent and PushEvent. Any fields that aren't present in a specific event will simply default to their default values.
 type Payload struct {
-	Action       string `json:"action,omitempty"`        // Для WatchEvent ("started")
-	RepositoryID int    `json:"repository_id,omitempty"` // Для PushEvent
-	PushID       int64  `json:"push_id,omitempty"`       // Для PushEvent (используем int64, так как ID бывают большими)
-	Ref          string `json:"ref,omitempty"`           // Для PushEvent ("refs/heads/master")
-	Head         string `json:"head,omitempty"`          // Для PushEvent
-	Before       string `json:"before,omitempty"`        // Для PushEvent
-	Size         int    `json:"size"`                    //Для PushEvent
+	Action       string `json:"action,omitempty"`        // For WatchEvent ("started")
+	RepositoryID int    `json:"repository_id,omitempty"` // For PushEvent
+	PushID       int64  `json:"push_id,omitempty"`       // For PushEvent (I use int64 because IDs can be large)
+	Ref          string `json:"ref,omitempty"`           // For PushEvent ("refs/heads/master")
+	Head         string `json:"head,omitempty"`          // For PushEvent
+	Before       string `json:"before,omitempty"`        // For PushEvent
+	Size         int    `json:"size"`                    // For PushEvent
 }
 
 func main() {
 
 	if len(os.Args) != 2 {
-		fmt.Println("Ошибка: нужно ровно 1 аргумент")
-		fmt.Println("Использование: github-activity <username>")
+		fmt.Println("Error: Exactly 1 argument is required")
+		fmt.Println("Usage: github-activity <username>")
 		os.Exit(1)
 	}
 	username := os.Args[1]
@@ -62,7 +62,7 @@ func main() {
 
 	resp, err := http.Get("https://api.github.com/users/" + username + "/events")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
@@ -78,14 +78,14 @@ func main() {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
 	var events []GitHubEvent
 	err = json.Unmarshal(body, &events)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
